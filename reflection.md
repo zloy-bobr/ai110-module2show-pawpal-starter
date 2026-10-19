@@ -4,13 +4,18 @@
 
 **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+I chose four classes for the system:
+
+- `Task` represents one activity with a description, optional time, frequency, completion status, duration, and priority.
+- `Pet` stores a pet's name and species, plus its tasks, and provides methods to add or remove tasks.
+- `Owner` stores the owner's name and pets, manages the pet list, and provides `get_all_tasks()` to collect tasks across every pet.
+- `Scheduler` uses an `Owner` to retrieve all tasks, organize pending tasks by time and priority, and mark an owner's task complete.
+
+One owner can have multiple pets, and each pet can have multiple tasks. A scheduler belongs to one owner and accesses tasks through that owner's `get_all_tasks()` method, so it can work across multiple pets.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+The initial `CareTask` and `DailySchedule` draft was changed to `Task` and `Scheduler` to match the required responsibilities. The scheduler now receives an owner and gets tasks only through `Owner.get_all_tasks()`, rather than depending on one pet; it also filters, orders, and manages task completion. Task inputs validate non-empty descriptions and frequencies, positive durations, and supported priorities. Owner preferences are not modeled yet, so preference-based scheduling would need an additional design decision later.
 
 ---
 
@@ -32,13 +37,11 @@
 
 **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used an AI coding assistant to brainstorm the class model, draft the Python classes, create the terminal demo, and write focused tests. I asked it to review the class relationships and later to verify that the scheduler gathered tasks through the owner's `get_all_tasks()` method so it would work across multiple pets. Specific prompts about expected behavior and required method names were more useful than asking for a broad implementation.
 
 **b. Judgment and verification**
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+The initial design used `CareTask` and `DailySchedule`, but the project requirements called for `Task` and `Scheduler`, so I changed the model to match those responsibilities. The AI review also noted that owner preferences are not represented; I left them out for this version because the requested implementation focuses on multi-pet task retrieval and the current UI does not collect preferences. I verified the result by running `python main.py` and `python -m pytest`; the demo printed tasks from two pets, and both tests passed, including the completion-status test.
 
 ---
 

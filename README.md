@@ -67,18 +67,20 @@ Mochi's Tasks
 ## 🧪 Testing PawPal+
 
 ```bash
-# Run the full test suite:
-pytest
-
-# Run with coverage:
-pytest --cov
+python -m pytest
 ```
 
-Sample test output:
+The tests cover task and pet management, task filtering, chronological and priority sorting, daily and weekly recurrence, completion behavior, and overlapping-task conflict warnings.
 
+Test output:
+
+```text
+tests\test_pawpal.py .............                                       [100%]
+
+============================= 13 passed in 0.07s ==============================
 ```
-# Paste your pytest output here
-```
+
+**Confidence Level:** 4/5 stars. The suite verifies the main scheduling and recurrence behaviors, including important edge cases, but it does not exhaustively test every input combination or the Streamlit interface.
 
 ## 📐 Smarter Scheduling
 

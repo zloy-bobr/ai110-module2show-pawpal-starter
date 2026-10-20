@@ -3,9 +3,11 @@ classDiagram
         +String description
         +Time time
         +String frequency
+        +Date recurrence_start
         +bool completed
         +int duration_minutes
         +String priority
+        +occurs_on(day: Date) bool
     }
 
     class Pet {
@@ -28,8 +30,12 @@ classDiagram
         +Owner owner
         +get_all_tasks() List~Task~
         +get_pending_tasks() List~Task~
-        +organize_tasks(include_completed: bool) List~Task~
-        +mark_complete(task: Task) void
+        +filter_tasks(pet: Pet, pet_name: String, completed: bool, on_date: Date) List~Task~
+        +organize_tasks(include_completed: bool, pet: Pet, on_date: Date, completed: bool) List~Task~
+        +sort_by_time(tasks: List~Task~) List~Task~
+        +find_conflicts(on_date: Date, pet: Pet) List~Tuple~Task, Task~~
+        +get_conflict_warnings(on_date: Date, pet: Pet) List~String~
+        +mark_complete(task: Task, today: Date) Task
     }
 
     Owner "1" --> "0..*" Pet : owns

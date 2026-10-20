@@ -28,8 +28,7 @@ The initial `CareTask` and `DailySchedule` draft was changed to `Task` and `Sche
 
 **b. Tradeoffs**
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+The scheduler reports overlapping tasks but does not automatically move or reschedule them. This keeps scheduling predictable and preserves the times the owner entered, while leaving the owner to decide which task should change when a conflict occurs.
 
 ---
 

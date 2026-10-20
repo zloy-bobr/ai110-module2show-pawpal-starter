@@ -48,14 +48,21 @@ Output from running `python main.py`:
 
 ```text
 Today's Schedule
-07:00 | Mochi (cat) | Breakfast (10 min, high priority, daily)
+08:00 | Mochi (cat) | Breakfast (10 min, high priority, daily)
 08:00 | Biscuit (dog) | Morning walk (30 min, high priority, daily)
 19:00 | Mochi (cat) | Evening medication (5 min, medium priority, daily)
+
+Schedule Warnings
+WARNING: Mochi's Breakfast at 08:00 overlaps with Biscuit's Morning walk at 08:00.
+
+Mochi's Tasks
+08:00 | Breakfast
+19:00 | Evening medication
 ```
 
 ## Implementation Summary
 
-`Task` stores an activity's description, time, frequency, completion status, duration, and priority. Each `Pet` manages its own tasks, while `Owner` manages multiple pets and gathers their tasks with `get_all_tasks()`. `Scheduler` uses that owner-level method to filter, order, and mark tasks complete across all pets. The `main.py` demo prints this schedule in a readable terminal format, and the tests cover task completion and adding tasks to a pet.
+`Task` stores an activity's description, time, frequency, recurrence start date, completion status, duration, and priority. Each `Pet` manages its own tasks, while `Owner` manages multiple pets and gathers their tasks with `get_all_tasks()`. `Scheduler` uses that owner-level method to filter by pet, completion status, and date; order tasks by time and priority; report overlapping timed tasks; and create the next daily or weekly task instance when one is completed. `timedelta` advances the next due date by one or seven days. In `app.py`, Streamlit keeps the `Owner` in session state and lets the user select a schedule date, pet, and task status. The `main.py` demo prints a readable terminal schedule, and tests cover task management and scheduling behavior.
 
 ## 🧪 Testing PawPal+
 
@@ -75,14 +82,17 @@ Sample test output:
 
 ## 📐 Smarter Scheduling
 
-> Fill in once you've implemented scheduling logic.
-
 | Feature | Method(s) | Notes |
 |---------|-----------|-------|
-| Task sorting | | e.g., by priority, duration |
-| Filtering | | e.g., skip tasks if time runs out |
-| Conflict handling | | e.g., overlapping time slots |
-| Recurring tasks | | e.g., daily vs. weekly |
+| Task sorting | `Scheduler.sort_by_time`, `Scheduler.organize_tasks` | Sorts by zero-padded `HH:MM` (unscheduled last); organizer also uses priority and description. |
+| Filtering | `Scheduler.filter_tasks` | Filters across the owner's pets by pet object or case-insensitive pet name, completion status, and date. |
+| Conflict detection and warnings | `Scheduler.find_conflicts`, `Scheduler.get_conflict_warnings` | Finds duration overlaps between timed tasks, including across pets; touching end-to-start is not a conflict. Returns readable warning strings without raising when conflicts exist. |
+| Recurring task dates | `Task.occurs_on` | Determines whether daily, weekly, and as-needed tasks are eligible on a selected date. |
+| Next occurrence on completion | `Scheduler.mark_complete` | Marks the current task complete and creates a fresh daily or weekly task using a one- or seven-day `timedelta`; as-needed tasks do not repeat automatically. |
+
+### Algorithm choices
+
+Tasks are sorted by time first, with priority used to break same-time ties. Sorting only by priority could delay time-sensitive care, while sorting only by time would ignore urgency when times match. Recurrence uses a start date and a small set of frequencies rather than a full calendar-rule engine; this keeps behavior easy to explain, but does not model exceptions or custom intervals. Completing a daily or weekly task creates a new task for the next occurrence, while as-needed tasks remain one-off. Conflict detection sorts the day's timed tasks and scans active intervals. Compared with checking every possible pair, this is efficient on schedules with few overlaps; when many tasks overlap, the output itself can still contain a quadratic number of pairs.
 
 ## 📸 Demo Walkthrough
 

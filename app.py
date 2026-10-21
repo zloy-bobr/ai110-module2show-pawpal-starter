@@ -155,11 +155,17 @@ if st.button("Generate schedule"):
             pet=schedule_pet,
         ):
             st.warning(warning)
-        for task in scheduled_tasks:
-            pet = task_pets[task]
-            task_time = task.time.strftime("%H:%M") if task.time else "Any time"
-            st.write(
-                f"**{task_time}** | {pet.name} ({pet.species}) | "
-                f"{task.description} ({task.duration_minutes} min, "
-                f"{task.priority} priority, {task.frequency})"
-            )
+        st.table(
+            [
+                {
+                    "Time": task.time.strftime("%H:%M") if task.time else "Any time",
+                    "Pet": f"{task_pets[task].name} ({task_pets[task].species})",
+                    "Task": task.description,
+                    "Duration": f"{task.duration_minutes} min",
+                    "Priority": task.priority,
+                    "Frequency": task.frequency,
+                    "Completed": "Yes" if task.completed else "No",
+                }
+                for task in scheduled_tasks
+            ]
+        )

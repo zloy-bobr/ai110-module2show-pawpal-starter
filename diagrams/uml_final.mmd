@@ -1,0 +1,44 @@
+classDiagram
+    class Task {
+        +String description
+        +TimeOfDay time
+        +String frequency
+        +Date recurrence_start
+        +bool completed
+        +int duration_minutes
+        +String priority
+        +__post_init__() None
+        +occurs_on(day: Date) bool
+    }
+
+    class Pet {
+        +String name
+        +String species
+        +List~Task~ tasks
+        +add_task(task: Task) None
+        +remove_task(task: Task) None
+    }
+
+    class Owner {
+        +String name
+        +List~Pet~ pets
+        +add_pet(pet: Pet) None
+        +remove_pet(pet: Pet) None
+        +get_all_tasks() List~Task~
+    }
+
+    class Scheduler {
+        +Owner owner
+        +get_all_tasks() List~Task~
+        +filter_tasks(pet: Pet?, pet_name: String?, completed: bool?, on_date: Date?) List~Task~
+        +get_pending_tasks() List~Task~
+        +organize_tasks(include_completed: bool, pet: Pet?, on_date: Date?, completed: bool?) List~Task~
+        +sort_by_time(tasks: List~Task~?) List~Task~
+        +find_conflicts(on_date: Date, pet: Pet?) List~Tuple~Task, Task~~
+        +get_conflict_warnings(on_date: Date, pet: Pet?) List~String~
+        +mark_complete(task: Task, today: Date?) Task?
+    }
+
+    Owner "1" --> "0..*" Pet : owns
+    Pet "1" --> "0..*" Task : manages
+    Scheduler "1" --> "1" Owner : retrieves tasks through get_all_tasks

@@ -23,8 +23,7 @@ The initial `CareTask` and `DailySchedule` draft was changed to `Task` and `Sche
 
 **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+The scheduler considers each task's scheduled time, duration, priority, recurrence date, completion status, and pet. For the generated schedule, time comes first, then priority and task description; tasks without a time appear last. Duration is used to detect overlaps, not to move tasks automatically. I prioritized time because care tasks may need to happen at a particular hour, then used priority to order tasks with the same time. Owner preferences are not represented in this version.
 
 **b. Tradeoffs**
 
@@ -36,11 +35,13 @@ The scheduler reports overlapping tasks but does not automatically move or resch
 
 **a. How you used AI**
 
-I used an AI coding assistant to brainstorm the class model, draft the Python classes, create the terminal demo, and write focused tests. I asked it to review the class relationships and later to verify that the scheduler gathered tasks through the owner's `get_all_tasks()` method so it would work across multiple pets. Specific prompts about expected behavior and required method names were more useful than asking for a broad implementation.
+I used the assistant to brainstorm the class model, draft code and tests, explain the scheduling behavior, and review the UML and README against the implementation. The most effective features were focused code generation, test suggestions, and review questions about concrete requirements such as multi-pet task retrieval and same-time sorting. Specific prompts with method names and expected behavior produced more useful results than broad requests to build the whole application.
+
+Separate chat sessions for design, implementation, testing, and documentation helped keep each phase's goal clear. I could focus each session on a small deliverable, such as checking recurrence tests or updating the UML, without mixing it with unrelated UI or documentation questions. I still checked decisions against the code and the project requirements rather than treating each answer as authoritative.
 
 **b. Judgment and verification**
 
-The initial design used `CareTask` and `DailySchedule`, but the project requirements called for `Task` and `Scheduler`, so I changed the model to match those responsibilities. The AI review also noted that owner preferences are not represented; I left them out for this version because the requested implementation focuses on multi-pet task retrieval and the current UI does not collect preferences. I verified the result by running `python main.py` and `python -m pytest`; the demo printed tasks from two pets, and both tests passed, including the completion-status test.
+The initial draft used `CareTask` and `DailySchedule`, but I changed those to `Task` and `Scheduler` to match the required responsibilities. The assistant pointed out that owner preferences were not modeled. I kept that feature out because the UI does not collect preferences and adding them would expand the design beyond the current scheduling requirements. Similarly, the scheduler reports conflicts but leaves rescheduling to the owner, keeping entered times unchanged. I verified the implementation with `python main.py` and `python -m pytest`; the demo showed tasks from two pets and the test suite passed all 13 tests.
 
 ---
 
@@ -48,13 +49,11 @@ The initial design used `CareTask` and `DailySchedule`, but the project requirem
 
 **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+The tests cover task assignment, filtering by pet and completion status, case-insensitive pet-name filtering, recurrence dates, and schedule ordering by time and priority. They also check daily and weekly next occurrences, as-needed and repeated completion behavior, and conflict detection for overlapping tasks, including tasks at the same time and tasks that meet end-to-start. These checks matter because filtering, recurrence, and overlap errors could make a schedule omit care tasks, show them on the wrong date, or give the owner misleading warnings.
 
 **b. Confidence**
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+I am reasonably confident in the core scheduler behavior: all 13 automated tests pass, and the terminal demo shows a schedule across two pets with a conflict warning. I would not call it exhaustive because the Streamlit interface is not covered by automated UI tests. Next I would test an owner with no pets or tasks, invalid task inputs, duplicate pet names, and tasks whose durations cross midnight. I would also clarify and test how as-needed tasks should appear on future dates.
 
 ---
 
@@ -62,12 +61,12 @@ The initial design used `CareTask` and `DailySchedule`, but the project requirem
 
 **a. What went well**
 
-- What part of this project are you most satisfied with?
+I am most satisfied that the scheduler works across multiple pets through the owner's task collection method, while keeping task ownership clear. The same-time sorting and conflict warning make schedule behavior visible instead of silently changing the owner's plan.
 
 **b. What you would improve**
 
-- If you had another iteration, what would you improve or redesign?
+In another iteration, I would add UI controls to edit and remove tasks, then consider optional owner preferences such as unavailable time windows. I would add automated tests for the Streamlit workflows and decide explicitly how to handle tasks that extend past midnight before changing the conflict algorithm.
 
 **c. Key takeaway**
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+I learned that being the lead architect means defining the requirements and boundaries, choosing which tradeoffs fit the user, and verifying the result. AI made it faster to draft code and tests, but I still had to decide what belonged in the design, reject unnecessary complexity, and check that the implementation and documentation matched the actual behavior.

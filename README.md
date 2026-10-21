@@ -1,68 +1,51 @@
-# PawPal+ (Module 2 Project)
+# PawPal+ Pet Care Scheduler
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+PawPal+ is a Streamlit app for managing pets' care tasks and generating a date-specific schedule. It supports multiple pets per owner and displays task times, priorities, durations, recurrence, and completion status.
 
-## Scenario
+## Features
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+- **Owner, pet, and task management:** Set the owner name, add pets, and create tasks with a time, duration, priority, and frequency in [`app.py`](app.py). The `Task`, `Pet`, and `Owner` models and their validation are implemented in [`pawpal_system.py`](pawpal_system.py).
+- **Filtered schedules:** Choose a date, one pet or all pets, and pending, completed, or all tasks. The UI uses `Scheduler.organize_tasks()` and displays the results in a table.
+- **Sorting:** Schedule results are ordered by time, then priority, then task description; tasks without a time appear last. `Scheduler.sort_by_time()` also provides chronological ordering.
+- **Recurrence:** Daily tasks recur each day; weekly tasks recur every seven days from their start date. As-needed tasks are eligible on dates from their start date but do not automatically create a new task when completed.
+- **Conflict warnings:** `Scheduler.find_conflicts()` detects overlaps between pending, timed tasks using their durations. It can report conflicts across pets; tasks that meet end-to-start are not considered overlapping. The UI displays warnings without changing task times.
+- **Completion tracking:** Completing a daily or weekly task marks it complete and adds its next occurrence. Completing an as-needed task does not create another occurrence.
+- **Input validation:** Tasks require a non-empty description, a positive duration, and supported frequency and priority values.
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+The scheduler does not currently model owner preferences or automatically resolve conflicts; it reports overlaps for the owner to address.
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+## Setup and Run
 
-## What you will build
-
-Your final app should:
-
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
-
-## Getting started
-
-### Setup
+Create and activate a virtual environment, then install the dependencies:
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+```
+
+Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+macOS or Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies and start the Streamlit app:
+
+```bash
 pip install -r requirements.txt
+python -m streamlit run app.py
 ```
 
-### Suggested workflow
+Run the terminal demonstration with:
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
-
-## 🖥️ Sample Output
-
-Output from running `python main.py`:
-
-```text
-Today's Schedule
-08:00 | Mochi (cat) | Breakfast (10 min, high priority, daily)
-08:00 | Biscuit (dog) | Morning walk (30 min, high priority, daily)
-19:00 | Mochi (cat) | Evening medication (5 min, medium priority, daily)
-
-Schedule Warnings
-WARNING: Mochi's Breakfast at 08:00 overlaps with Biscuit's Morning walk at 08:00.
-
-Mochi's Tasks
-08:00 | Breakfast
-19:00 | Evening medication
+```bash
+python main.py
 ```
-
-## Implementation Summary
-
-`Task` stores an activity's description, time, frequency, recurrence start date, completion status, duration, and priority. Each `Pet` manages its own tasks, while `Owner` manages multiple pets and gathers their tasks with `get_all_tasks()`. `Scheduler` uses that owner-level method to filter by pet, completion status, and date; order tasks by time and priority; report overlapping timed tasks; and create the next daily or weekly task instance when one is completed. `timedelta` advances the next due date by one or seven days. In `app.py`, Streamlit keeps the `Owner` in session state and lets the user select a schedule date, pet, and task status. The `main.py` demo prints a readable terminal schedule, and tests cover task management and scheduling behavior.
 
 ## 🧪 Testing PawPal+
 
@@ -82,28 +65,36 @@ tests\test_pawpal.py .............                                       [100%]
 
 **Confidence Level:** 4/5 stars. The suite verifies the main scheduling and recurrence behaviors, including important edge cases, but it does not exhaustively test every input combination or the Streamlit interface.
 
-## 📐 Smarter Scheduling
+## Demo Walkthrough
 
-| Feature | Method(s) | Notes |
-|---------|-----------|-------|
-| Task sorting | `Scheduler.sort_by_time`, `Scheduler.organize_tasks` | Sorts by zero-padded `HH:MM` (unscheduled last); organizer also uses priority and description. |
-| Filtering | `Scheduler.filter_tasks` | Filters across the owner's pets by pet object or case-insensitive pet name, completion status, and date. |
-| Conflict detection and warnings | `Scheduler.find_conflicts`, `Scheduler.get_conflict_warnings` | Finds duration overlaps between timed tasks, including across pets; touching end-to-start is not a conflict. Returns readable warning strings without raising when conflicts exist. |
-| Recurring task dates | `Task.occurs_on` | Determines whether daily, weekly, and as-needed tasks are eligible on a selected date. |
-| Next occurrence on completion | `Scheduler.mark_complete` | Marks the current task complete and creates a fresh daily or weekly task using a one- or seven-day `timedelta`; as-needed tasks do not repeat automatically. |
+### Main UI
 
-### Algorithm choices
+The app keeps the owner and pet data in Streamlit session state. Enter or update the owner name, add pets by name and species, and select a pet to add care tasks. Each task has a description, time, duration, priority, and frequency. The selected pet's task list shows its schedule details and completion status. Use the completion control to mark a pending task complete; daily and weekly tasks create their next occurrence automatically.
 
-Tasks are sorted by time first, with priority used to break same-time ties. Sorting only by priority could delay time-sensitive care, while sorting only by time would ignore urgency when times match. Recurrence uses a start date and a small set of frequencies rather than a full calendar-rule engine; this keeps behavior easy to explain, but does not model exceptions or custom intervals. Completing a daily or weekly task creates a new task for the next occurrence, while as-needed tasks remain one-off. Conflict detection sorts the day's timed tasks and scans active intervals. Compared with checking every possible pair, this is efficient on schedules with few overlaps; when many tasks overlap, the output itself can still contain a quadratic number of pairs.
+### Example Workflow
 
-## 📸 Demo Walkthrough
+1. Start the app with `python -m streamlit run app.py`.
+2. Add a pet, such as Mochi the cat, then select Mochi.
+3. Add a task such as Breakfast at 08:00, with a duration and priority.
+4. Add another pet, such as Biscuit the dog, and create a Morning walk also scheduled for 08:00.
+5. In **Build Schedule**, select today's date, choose **All pets** and **Pending**, then generate the schedule.
 
-Describe your app in numbered steps so a reader can follow along without watching a video:
+The generated schedule is sorted by time, then priority and task description, and displayed with each task's pet, duration, frequency, and completion status. Because the example tasks overlap, the app shows a conflict warning. Change the date, pet filter, or status filter to view a different schedule.
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+### Terminal Demo
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or link to a demo video here -->
+Run `python main.py` to see the multi-pet schedule and same-time conflict warning:
+
+```text
+Today's Schedule
+08:00 | Mochi (cat) | Breakfast (10 min, high priority, daily)
+08:00 | Biscuit (dog) | Morning walk (30 min, high priority, daily)
+19:00 | Mochi (cat) | Evening medication (5 min, medium priority, daily)
+
+Schedule Warnings
+WARNING: Mochi's Breakfast at 08:00 overlaps with Biscuit's Morning walk at 08:00.
+
+Mochi's Tasks
+08:00 | Breakfast
+19:00 | Evening medication
+```
